@@ -1,8 +1,21 @@
 import robin_stocks
 import metrics
+from stock import Stock
 
-# Generate some test tickers
+#login to accout
+# TODO - json file 
+def login():
+    f = open('data/client_secrets.json',)
+    data = json.load(f)
+    username, password = data['client'], data['client_secret']
+    robin_stocks.login(username, password)
+    f.close()
+    return
 
+# TODO - schedular to make it run every market day
+# https: // datatofish.com/python-script-windows-scheduler/
+
+#Test tickers
 top_100 = [Stock(i['symbol']) for i in robin_stocks.get_top_100()]
 top_movers = [Stock(i['symbol']) for i in robin_stocks.get_top_movers()]
 top_down = [Stock(i['symbol']) for i in robin_stocks.get_top_movers_sp500('down')]
@@ -14,23 +27,7 @@ holding = [Stock(i) for i in list(robin_stocks.account.build_holdings().keys())]
 swingers = [Stock(i['symbol']) for i in robin_stocks.get_watchlist_by_name('Daily Movers')['results']]
 
 
-#Pre-sellected Stocks in holding to sell at value price
-SELLING_LIST = {'CCIV': 35,
-                'FUBO': 45,
-                'CRON': 15,
-                'BNGO': 17,
-                'ET': 15,
-                'WNW': 22,
-                'RIOT': 72,
-                'NIO': 51,
-                'PRLD': 75,
-                'TLS': 41,
-                'BDSX': 30,
-                'NNOX': 56,
-                'NOVA': 54}
-
-
-def check_to_sell(selling=SELLING_LIST):
+def check_to_sell(selling):
     holdings = robin_stocks.build_holdings()
     for k, v in selling.items():
         stock = Stock(k)
@@ -41,10 +38,6 @@ def check_to_sell(selling=SELLING_LIST):
                 k, quantity=qsell, orderType='market', side='sell', trigger='immediate')
             print(f'{stock.symbol} SOLD at {stock.price}')
     return
-
-
-check_to_sell()
-
 
 def filterby_long_term_metrics(stocks):
     rv = []
@@ -58,8 +51,7 @@ def filterby_long_term_metrics(stocks):
             pass
     return rv
 
-
-def filterby_price(stocks, price_celling):
+def filter_by_price(stocks, price_celling):
     rv = []
     for s in stocks:
         if s.update() <= price_celling:
