@@ -67,7 +67,8 @@ class Flux_Trader:
                     #self.sell(self.stock.symbol)
                     self.reccord[1] = p
                     self.is_holding = False
-                    return self.reccord
+                    return self.profit()
+        
             #try moving to next price spit out by generator
             try:
                 p = float(next(stream))
